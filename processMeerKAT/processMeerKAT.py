@@ -564,8 +564,8 @@ def write_sbatch(script,args,nodes=1,tasks=16,mem=MEM_PER_NODE_GB_LIMIT,name="jo
         params['mem'] = 150
         params['cpus'] = 1
         if 'quick_tclean' in script:
-            params['tasks'] = 6
-            params['cpus'] = 6
+            params['tasks'] = 4
+            params['cpus'] = 8
             params['time'] = '03:00:00'
         elif mpi_wrapper != 'srun':
             # Threadsafe MPI scripts: cap at 8 tasks
