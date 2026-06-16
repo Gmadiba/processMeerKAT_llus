@@ -59,6 +59,7 @@ SPW_PREFIX = '*:'
 #Set global values for field, crosscal and SLURM arguments copied to config file, and some of their default values
 FIELDS_CONFIG_KEYS = ['fluxfield','bpassfield','phasecalfield','targetfields','extrafields']
 CROSSCAL_CONFIG_KEYS = ['minbaselines','chanbin','width','timeavg','createmms','keepmms','spw','nspw','calcrefant','refant','standard','badants','badfreqranges']
+CROSSCAL_OPTIONAL_KEYS = ['polcalfield']
 SELFCAL_CONFIG_KEYS = ['nloops','loop','cell','robust','imsize','wprojplanes','niter','threshold','uvrange','nterms','gridder','deconvolver','solint','calmode','discard_nloops','gaintype','outlier_threshold','flag','outlier_radius']
 IMAGING_CONFIG_KEYS = ['cell', 'robust', 'imsize', 'wprojplanes', 'niter', 'threshold', 'multiscale', 'nterms', 'gridder', 'deconvolver', 'restoringbeam', 'stokes', 'mask', 'rmsmap','outlierfile', 'pbthreshold', 'pbband', 'usemask', 'sidelobethreshold', 'noisethreshold', 'lownoisethreshold', 'negativethreshold', 'alpha_nsigma']
 SLURM_CONFIG_STR_KEYS = ['container','mpi_wrapper','partition','time','name','dependencies','exclude','account','reservation']
@@ -1039,7 +1040,7 @@ def write_jobs(config, scripts=[], threadsafe=[], containers=[], num_precal_scri
         Just run the pipeline without rebuilding each job script (if it exists)."""
 
     kwargs = locals()
-    crosscal_kwargs = get_config_kwargs(config, 'crosscal', CROSSCAL_CONFIG_KEYS)
+    crosscal_kwargs = get_config_kwargs(config, 'crosscal', CROSSCAL_CONFIG_KEYS, optional_keys=CROSSCAL_OPTIONAL_KEYS)
     pad_length = len(name)
 
     #Write sbatch file for each input python script
@@ -1226,7 +1227,7 @@ def format_args(config,submit,quiet,dependencies,justrun):
     kwargs = get_config_kwargs(config,'slurm',SLURM_CONFIG_KEYS)
     data_kwargs = get_config_kwargs(config,'data',['vis'])
     field_kwargs = get_config_kwargs(config, 'fields', FIELDS_CONFIG_KEYS)
-    crosscal_kwargs = get_config_kwargs(config, 'crosscal', CROSSCAL_CONFIG_KEYS)
+    crosscal_kwargs = get_config_kwargs(config, 'crosscal', CROSSCAL_CONFIG_KEYS, optional_keys=CROSSCAL_OPTIONAL_KEYS)
 
     #Force submit=True if user has requested it during [-R --run]
     if submit:
@@ -1592,7 +1593,7 @@ def spw_split(spw,nspw,config,mem,badfreqranges,MS,partition,createmms=True,remo
 
     return nspw
 
-def get_config_kwargs(config,section,expected_keys):
+def get_config_kwargs(config,section,expected_keys,optional_keys=[]):
 
     """Return kwargs from config section. Check section exists, and that all expected keys are present, otherwise raise KeyError.
 
@@ -1603,7 +1604,9 @@ def get_config_kwargs(config,section,expected_keys):
     section : str
         Config section from which to extract kwargs.
     expected_keys : list
-        List of expected keys.
+        List of expected (required) keys.
+    optional_keys : list, optional
+        Keys that are recognised but not required — won't trigger "unknown" warnings or "missing" errors.
 
     Returns:
     --------
@@ -1619,11 +1622,11 @@ def get_config_kwargs(config,section,expected_keys):
     kwargs = config_dict[section]
 
     #Check for any unknown keys and display warning
-    unknown_keys = list(set(kwargs) - set(expected_keys))
+    unknown_keys = list(set(kwargs) - set(expected_keys) - set(optional_keys))
     if len(unknown_keys) > 0:
         logger.warning("Unknown keys {0} present in section [{1}] in '{2}'.".format(unknown_keys,section,config))
 
-    #Check that expected keys are present, otherwise raise KeyError
+    #Check that expected (required) keys are present, otherwise raise KeyError
     missing_keys = list(set(expected_keys) - set(kwargs))
     if len(missing_keys) > 0:
         raise KeyError("Keys {0} missing from section [{1}] in '{2}'. Please add these keywords to '{2}', or else run [-B --build] step again.".format(missing_keys,section,config))
