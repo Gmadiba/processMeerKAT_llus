@@ -323,10 +323,10 @@ def science_image(vis, cell, robust, imsize, wprojplanes, niter, threshold, mult
                   alpha_nsigma=alpha_nsigma)
 
     if spw_cube:
-        # Image each spectral window separately into SPWs_full_stokes/ (an SPW "cube" of
+        # Image each spectral window separately into SPW_MFSs/ (an SPW "cube" of
         # per-SPW images) instead of producing a single full-bandwidth averaged image.
         spw_ids, labels = _resolve_spws(vis, spwid)
-        outdir = 'SPWs_full_stokes'
+        outdir = 'SPW_MFSs'
         os.makedirs(outdir, exist_ok=True)
         logger.info("spw_cube=True: imaging {0} SPW(s) {1} separately into '{2}/'.".format(len(spw_ids), spw_ids, outdir))
         for sid, label in zip(spw_ids, labels):

@@ -13,7 +13,7 @@ This is a personal fork of the [IDIA MeerKAT pipeline](https://github.com/idia-a
 * **`atrous_do` config option** (`[selfcal]`) — enables PyBDSF à-trous (wavelet) decomposition during self-cal source finding to better recover extended/diffuse emission. Defaults to `False` (existing behaviour). Applied in `selfcal_part2.py`.
 * **Science-imaging masking modes** (`[image]`) — choose `usemask = 'user'` (standard, uses `mask`) or `usemask = 'auto-multithresh'` (uses `sidelobethreshold`, `noisethreshold`, `lownoisethreshold`, `negativethreshold` instead).
 * **PyBDSF-driven spectral-index (alpha) imaging** — for multi-Stokes / non-`I` `mtmfs` runs, the science imaging step builds a noise-thresholded `alpha` map and `alpha.error` map (with a restoring beam inherited from Stokes I so PyBDSF can read it), controlled by `alpha_nsigma`.
-* **Per-SPW science imaging** (`[image]`) — set `spw_cube = True` to image each spectral window separately (into `SPWs_full_stokes/`) instead of producing a single full-bandwidth averaged image. Frequency labels are auto-derived from the MS metadata, and `spwid` optionally restricts which SPWs are imaged (`''` = all). Combine with `stokes = 'IQUV'` for full-Stokes per-SPW imaging.
+* **Per-SPW science imaging** (`[image]`) — set `spw_cube = True` to image each spectral window separately (into `SPW_MFSs/`) instead of producing a single full-bandwidth averaged image. Frequency labels are auto-derived from the MS metadata, and `spwid` optionally restricts which SPWs are imaged (`''` = all). Combine with `stokes = 'IQUV'` for full-Stokes per-SPW imaging.
 * **Automatic log cleanup** — once all pipeline jobs finish, a lightweight dependent SLURM job removes stray `casa*.log` files from the working directory.
 * **Python 3.12 fixes** — `SafeConfigParser` → `RawConfigParser`, invalid escape-sequence `SyntaxWarning`s resolved.
 
@@ -74,18 +74,63 @@ For help, run `processMeerKAT.py -h`, which provides a brief description of all 
 
 These keys are added/used by this fork. They all have sensible defaults, so existing config files keep working unchanged.
 
-| Section | Key | Default | Purpose |
-| --- | --- | --- | --- |
-| `[crosscal]` | `polcalfield` | `''` | Fallback XY-phase calibrator; only used when no canonical pol calibrator is in the MS. |
-| `[selfcal]` | `atrous_do` | `False` | Enable PyBDSF à-trous (wavelet) decomposition during self-cal source finding. |
-| `[image]` | `usemask` | `'user'` | `'user'` uses `mask`; `'auto-multithresh'` uses the thresholds below instead. |
-| `[image]` | `sidelobethreshold` | `0.5` | Only used when `usemask = 'auto-multithresh'`. |
-| `[image]` | `noisethreshold` | `5.0` | Only used when `usemask = 'auto-multithresh'`. |
-| `[image]` | `lownoisethreshold` | `0.01` | Only used when `usemask = 'auto-multithresh'`. |
-| `[image]` | `negativethreshold` | `0.0` | Only used when `usemask = 'auto-multithresh'`. |
-| `[image]` | `alpha_nsigma` | `1.0` | Sigma cut for the final alpha mask (used when `stokes != 'I'` to produce a spectral-index image). |
-| `[image]` | `spw_cube` | `False` | Image each SPW separately into `SPWs_full_stokes/` instead of one full-bandwidth averaged image. |
-| `[image]` | `spwid` | `''` | Comma-separated SPW IDs to image when `spw_cube = True` (e.g. `'0,1,2'`); `''` = all SPWs. |
+<table>
+  <thead>
+    <tr><th>Section</th><th>Key</th><th>Default</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>[crosscal]</code></td>
+      <td><code>polcalfield</code></td>
+      <td><code>''</code></td>
+      <td>Fallback XY-phase calibrator; only used when no canonical pol calibrator is in the MS.</td>
+    </tr>
+    <tr>
+      <td><code>[selfcal]</code></td>
+      <td><code>atrous_do</code></td>
+      <td><code>False</code></td>
+      <td>Enable PyBDSF à-trous (wavelet) decomposition during self-cal source finding.</td>
+    </tr>
+    <tr>
+      <td rowspan="8"><code>[image]</code></td>
+      <td><code>usemask</code></td>
+      <td><code>'user'</code></td>
+      <td><code>'user'</code> uses <code>mask</code>; <code>'auto-multithresh'</code> uses the thresholds below instead.</td>
+    </tr>
+    <tr>
+      <td><code>sidelobethreshold</code></td>
+      <td><code>0.5</code></td>
+      <td rowspan="4">Only used when <code>usemask = 'auto-multithresh'</code>.</td>
+    </tr>
+    <tr>
+      <td><code>noisethreshold</code></td>
+      <td><code>5.0</code></td>
+    </tr>
+    <tr>
+      <td><code>lownoisethreshold</code></td>
+      <td><code>0.01</code></td>
+    </tr>
+    <tr>
+      <td><code>negativethreshold</code></td>
+      <td><code>0.0</code></td>
+    </tr>
+    <tr>
+      <td><code>alpha_nsigma</code></td>
+      <td><code>1.0</code></td>
+      <td>Sigma cut for the final alpha mask (used when <code>stokes != 'I'</code> to produce a spectral-index image).</td>
+    </tr>
+    <tr>
+      <td><code>spw_cube</code></td>
+      <td><code>False</code></td>
+      <td>Image each SPW separately into <code>SPW_MFSs/</code> instead of one full-bandwidth averaged image.</td>
+    </tr>
+    <tr>
+      <td><code>spwid</code></td>
+      <td><code>''</code></td>
+      <td>Comma-separated SPW IDs to image when <code>spw_cube = True</code> (e.g. <code>'0,1,2'</code>); <code>''</code> = all SPWs.</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Using multiple spectral windows (new in v1.1)
 
