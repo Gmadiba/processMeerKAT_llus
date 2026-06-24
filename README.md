@@ -2,9 +2,19 @@
    <img src="https://raw.githubusercontent.com/idia-pipelines/idia-pipelines.github.io/master/assets/idia_logo.jpg" alt="IDIA pipelines"/>
 </p>
 
-# The IDIA MeerKAT Pipeline
+# processMeerKAT_llus — MeerKAT Pipeline (fork)
 
-The IDIA MeerKAT pipeline is a radio interferometric calibration pipeline designed to process MeerKAT data. **It is under regular development, and so far implements cross-calibration, selfcal-calibration, and science imaging. Please report any issues you find in the [GitHub issues](https://github.com/idia-astro/pipelines/issues).**
+This is a personal fork of the [IDIA MeerKAT pipeline](https://github.com/idia-astro/pipelines), a radio interferometric calibration pipeline designed to process MeerKAT data. It implements cross-calibration, self-calibration, and science imaging. This fork tracks the upstream `master` and adds a number of changes aimed at **full-polarization** processing, **Python 3.12** compatibility, and **science imaging** improvements.
+
+### What this fork changes relative to upstream `master`
+
+* **Polarization calibration on linear feeds** — L-band polarization calibrator support in `setjy`, plus XY-phase ambiguity solving when the polarization calibrator and phase calibrator share a name.
+* **`polcalfield` config option** (`[crosscal]`) — explicit fallback XY-phase calibrator, only used when no canonical pol calibrator (3C286/3C138/3C48/J1130-1449) is found in the MS. Optional; defaults to `''` and is auto-annotated by `-B`.
+* **`atrous_do` config option** (`[selfcal]`) — enables PyBDSF à-trous (wavelet) decomposition during self-cal source finding to better recover extended/diffuse emission. Defaults to `False` (existing behaviour). Applied in `selfcal_part2.py`.
+* **Science-imaging masking modes** (`[image]`) — choose `usemask = 'user'` (standard, uses `mask`) or `usemask = 'auto-multithresh'` (uses `sidelobethreshold`, `noisethreshold`, `lownoisethreshold`, `negativethreshold` instead).
+* **PyBDSF-driven spectral-index (alpha) imaging** — for multi-Stokes / non-`I` `mtmfs` runs, the science imaging step builds a noise-thresholded `alpha` map and `alpha.error` map (with a restoring beam inherited from Stokes I so PyBDSF can read it), controlled by `alpha_nsigma`.
+* **Automatic log cleanup** — once all pipeline jobs finish, a lightweight dependent SLURM job removes stray `casa*.log` files from the working directory.
+* **Python 3.12 fixes** — `SafeConfigParser` → `RawConfigParser`, invalid escape-sequence `SyntaxWarning`s resolved.
 
 ## Requirements
 
@@ -16,11 +26,13 @@ This pipeline is designed to run on the Ilifu cluster, making use of SLURM and M
 
 ## 1. Setup the pipeline in your environment
 
-In order to use the `processMeerKAT.py` script, source the `setup.sh` file, which can be done on [ilifu](https://docs.ilifu.ac.za/#/) as
+In order to use the `processMeerKAT.py` script, source this fork's `setup.sh` on [ilifu](https://docs.ilifu.ac.za/#/):
 
-        source /idia/software/pipelines/master/setup.sh
+        source /users/amani/processMeerKAT_fork/processMeerKAT/setup.sh
 
-which will add the correct paths to your `$PATH` and `$PYTHONPATH` in order to correctly use the pipeline. You could consider adding this to your `~/.profile` or `~/.bashrc` for future use.
+This adds the correct paths to your `$PATH` and `$PYTHONPATH` to use the pipeline. You could consider adding this to your `~/.profile` or `~/.bashrc` for future use.
+
+> If you switch between this fork and the upstream install (`source /idia/software/pipelines/master/setup.sh`), re-source the one you want and regenerate your sbatch scripts (`-R`) so they point at the correct `processMeerKAT` directory.
 
 ### 2. Build a config file:
 
@@ -46,7 +58,7 @@ This defines several variables that are read by the pipeline while calibrating t
 
         processMeerKAT.py -R -C myconfig.txt
 
-This will create `submit_pipeline.sh`, which you can then run with `./submit_pipeline.sh` to submit all pipeline jobs to the SLURM queue.
+This will create `submit_pipeline.sh`, which you can then run with `./submit_pipeline.sh` to submit all pipeline jobs to the SLURM queue. After all jobs complete, stray `casa*.log` files are automatically removed from the working directory.
 
 Other convenience scripts are also created that allow you to monitor and (if necessary) kill the jobs.
 
@@ -56,6 +68,21 @@ Other convenience scripts are also created that allow you to monitor and (if nec
 * `cleanup.sh` wipes all the intermediate data products created by the pipeline. This is intended to be launched after the pipeline has run and the output is verified to be good.
 
 For help, run `processMeerKAT.py -h`, which provides a brief description of all the [command line options](https://idia-pipelines.github.io/docs/processMeerKAT/using-the-pipeline#command-line-options).
+
+## Fork-specific config keys
+
+These keys are added/used by this fork. They all have sensible defaults, so existing config files keep working unchanged.
+
+| Section | Key | Default | Purpose |
+| --- | --- | --- | --- |
+| `[crosscal]` | `polcalfield` | `''` | Fallback XY-phase calibrator; only used when no canonical pol calibrator is in the MS. |
+| `[selfcal]` | `atrous_do` | `False` | Enable PyBDSF à-trous (wavelet) decomposition during self-cal source finding. |
+| `[image]` | `usemask` | `'user'` | `'user'` uses `mask`; `'auto-multithresh'` uses the thresholds below instead. |
+| `[image]` | `sidelobethreshold` | `0.5` | Only used when `usemask = 'auto-multithresh'`. |
+| `[image]` | `noisethreshold` | `5.0` | Only used when `usemask = 'auto-multithresh'`. |
+| `[image]` | `lownoisethreshold` | `0.01` | Only used when `usemask = 'auto-multithresh'`. |
+| `[image]` | `negativethreshold` | `0.0` | Only used when `usemask = 'auto-multithresh'`. |
+| `[image]` | `alpha_nsigma` | `1.0` | Sigma cut for the final alpha mask (used when `stokes != 'I'` to produce a spectral-index image). |
 
 ## Using multiple spectral windows (new in v1.1)
 
