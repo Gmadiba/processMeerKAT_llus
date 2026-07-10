@@ -341,7 +341,7 @@ def main(args,taskvals):
         outname = '{}/field_{}_xy_phase'.format(PLOT_DIR,polfield)
         plotcal(plotstr, int(msmd.fieldsforname(polfield)[0]), spwdir, caldir, table_ext, title, outname)
         
-        ###Additional QA plot scripts
+        ###Additional QA plot scripts for tables
         plotstr='imag,real'
         table_ext = 'xycal'
         title='HV Phase (amb resolved)'
@@ -354,7 +354,7 @@ def main(args,taskvals):
         outname = '{}/field_{}_xyamb_phase'.format(PLOT_DIR,polfield)
         plotcal(plotstr, int(msmd.fieldsforname(polfield)[0]), spwdir, caldir, table_ext, title, outname)
 
-        
+      
         msmd.done()
 
     except Exception as err:
