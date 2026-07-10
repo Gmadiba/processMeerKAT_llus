@@ -291,19 +291,19 @@ def main(args,taskvals):
             outname = '{}/field_{}_gain_amp'.format(PLOT_DIR,ff)
             plotcal(plotstr, int(msmd.fieldsforname(ff)[0]), spwdir, caldir, table_ext, title, outname)
 
-        #print("k")
-        #plotstr='delay,freq'
-        #table_ext = 'kcal'
-        #title='Delay'
-        #outname = '{}/field_{}_delay'.format(PLOT_DIR,fields.fluxfield)
-        #plotcal(plotstr, int(msmd.fieldsforname(fields.fluxfield)[0]), spwdir, caldir, table_ext, title, outname)
+        print("k")
+        plotstr='delay,freq'
+        table_ext = 'kcal'
+        title='Delay'
+        outname = '{}/field_{}_delay'.format(PLOT_DIR,fields.fluxfield)
+        plotcal(plotstr, int(msmd.fieldsforname(fields.fluxfield)[0]), spwdir, caldir, table_ext, title, outname)
 
-        #print("kcross")
-        #plotstr='delay,freq'
-        #table_ext = 'xdel'
-        #title='Crosshand Delay'
-        #outname = '{}/field_{}_crosshanddelay'.format(PLOT_DIR,fields.fluxfield)
-        #plotcal(plotstr, int(msmd.fieldsforname(fields.fluxfield)[0]), spwdir, caldir, table_ext, title, outname)
+        print("kcross")
+        plotstr='delay,freq'
+        table_ext = 'xdel'
+        title='Crosshand Delay'
+        outname = '{}/field_{}_crosshanddelay'.format(PLOT_DIR,fields.fluxfield)
+        plotcal(plotstr, int(msmd.fieldsforname(fields.fluxfield)[0]), spwdir, caldir, table_ext, title, outname)
 
         plotstr='amp,freq'
         table_ext = 'bcal'
@@ -322,6 +322,7 @@ def main(args,taskvals):
         title='Leakage Amp'
         outname = '{}/field_{}_leakage_amp'.format(PLOT_DIR,fields.bpassfield)
         plotcal(plotstr, int(msmd.fieldsforname(fields.dpolfield)[0]), spwdir, caldir, table_ext, title, outname, None, [0, 0.1])
+        
         plotstr='phase,freq'
         table_ext = 'pcal'
         title='Leakage Phase'
@@ -339,7 +340,21 @@ def main(args,taskvals):
         title='XY Phase (amb resolved)'
         outname = '{}/field_{}_xy_phase'.format(PLOT_DIR,polfield)
         plotcal(plotstr, int(msmd.fieldsforname(polfield)[0]), spwdir, caldir, table_ext, title, outname)
+        
+        ###Additional QA plot scripts
+        plotstr='imag,real'
+        table_ext = 'xycal'
+        title='HV Phase (amb resolved)'
+        outname = '{}/field_{}_xy_phase'.format(PLOT_DIR,polfield)
+        plotcal(plotstr, int(msmd.fieldsforname(polfield)[0]), spwdir, caldir, table_ext, title, outname)
+        
+        plotstr='imag,real'
+        table_ext = 'xyambcal'
+        title='HV Phase'
+        outname = '{}/field_{}_xyamb_phase'.format(PLOT_DIR,polfield)
+        plotcal(plotstr, int(msmd.fieldsforname(polfield)[0]), spwdir, caldir, table_ext, title, outname)
 
+        
         msmd.done()
 
     except Exception as err:
