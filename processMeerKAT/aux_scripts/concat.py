@@ -144,6 +144,20 @@ def do_concat(visname, fields, dirs='*MHz'):
                     virtualconcat(vis=MMSs, concatvis=out)
                     if fname == fields.targetfield.split(',')[0]:
                         newvis = out
+                        
+                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='{0}/bpass_real_imag.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='freq', yaxis='Amp', coloraxis='antenna1', plotfile='{0}/bpass_freq_amp.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='freq', yaxis='Phase', coloraxis='antenna1', plotfile='{0}/bpass_freq_phase.png'.format(PLOT_DIR),showgui=False)
+    
+                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='{0}/phasecal_real_imag.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='Time', yaxis='Amp', coloraxis='antenna1', plotfile='{0}/phasecal_time_amp.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='Time', yaxis='Phase', coloraxis='antenna1', plotfile='{0}/phasecal_time_phase.png'.format(PLOT_DIR),showgui=False)
+                        
+                        plot_antennas('bpass',newvis,xaxis='freq',yaxis='amp')
+                        plot_antennas('bpass',newvis,xaxis='freq',yaxis='phase')
+                        plot_antennas('phasecal',newvis,xaxis='time',yaxis='amp')
+                        plot_antennas('phasecal',newvis,xaxis='time',yaxis='phase')
+
 
                     if not os.path.exists(out):
                         logger.error("Output MMS '{0}' attempted to write but was not written.".format(out))
