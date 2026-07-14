@@ -144,14 +144,14 @@ def do_concat(visname, fields, dirs='*MHz'):
                     virtualconcat(vis=MMSs, concatvis=out)
                     if fname == fields.targetfield.split(',')[0]:
                         newvis = out
-                        
-                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='{0}/bpass_real_imag.png'.format(PLOT_DIR),showgui=False)
-                        plotms(vis=newvis, xaxis='freq', yaxis='Amp', coloraxis='antenna1', plotfile='{0}/bpass_freq_amp.png'.format(PLOT_DIR),showgui=False)
-                        plotms(vis=newvis, xaxis='freq', yaxis='Phase', coloraxis='antenna1', plotfile='{0}/bpass_freq_phase.png'.format(PLOT_DIR),showgui=False)
+                        #Inserting plotting of target field data.
+                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='Target_real_imag.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='freq', yaxis='Amp', coloraxis='antenna1', plotfile='Target_freq_amp.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='freq', yaxis='Phase', coloraxis='antenna1', plotfile='Target_freq_phase.png'.format(PLOT_DIR),showgui=False)
     
-                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='{0}/phasecal_real_imag.png'.format(PLOT_DIR),showgui=False)
-                        plotms(vis=newvis, xaxis='Time', yaxis='Amp', coloraxis='antenna1', plotfile='{0}/phasecal_time_amp.png'.format(PLOT_DIR),showgui=False)
-                        plotms(vis=newvis, xaxis='Time', yaxis='Phase', coloraxis='antenna1', plotfile='{0}/phasecal_time_phase.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='Real', yaxis='Imag', coloraxis='corr', plotfile='Target__real_imag.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='Time', yaxis='Amp', coloraxis='antenna1', plotfile='Target__time_amp.png'.format(PLOT_DIR),showgui=False)
+                        plotms(vis=newvis, xaxis='Time', yaxis='Phase', coloraxis='antenna1', plotfile='Target__time_phase.png'.format(PLOT_DIR),showgui=False)
                         
                         plot_antennas('bpass',newvis,xaxis='freq',yaxis='amp')
                         plot_antennas('bpass',newvis,xaxis='freq',yaxis='phase')
