@@ -741,6 +741,7 @@ def write_spw_master(filename,config,SPWs,precal_scripts,postcal_scripts,submit,
     master.write('\necho For all jobs within the {0} SPW directories:\n'.format(len(SPWs.split(','))))
     header = '-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------' + '-'*pad_length
     do = """echo "for f in {%s,}; do if [ -d \\$f ]; then cd \\$f; ./%s/%s%s; cd ..; else echo Directory \\$f doesn\\'t exist; fi; done;%s"""
+    do = """mkdir -p archive; find . -path ./archive -prune -o \( \( -type d -name "plots" \) -o \( -type d -name "SPW_MFSs" \) -o \( -type d -name "*science.image*" \)  -o -name "*.mms*" -o -name "*.png*" \) -prune -exec mv {} archive/ \;""" #INSERTED FOR ARCHIVING RESULTS
     suffix = '' if toplevel else ' \"'
     write_bash_job_script(master, killScript, extn, do % (SPWs,dir,killScript,extn,suffix), 'kill all the jobs', dir=dir,prefix=prefix)
     write_bash_job_script(master, cleanupScript, extn, do % (SPWs,dir,cleanupScript,extn,' \"'), r'remove the MMSs/MSs within SPW directories \(after pipeline has run\), while leaving any concatenated data at the top level', dir=dir)
